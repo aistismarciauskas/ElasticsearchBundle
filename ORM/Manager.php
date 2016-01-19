@@ -134,15 +134,17 @@ class Manager
 
     /**
      * Commits bulk batch to elasticsearch index.
+     *
+     * @param bool $refresh
      */
-    public function commit()
+    public function commit($refresh = true)
     {
         $this->dispatchEvent(
             Events::PRE_COMMIT,
             new ElasticsearchCommitEvent($this->getConnection())
         );
 
-        $this->getConnection()->commit();
+        $this->getConnection()->commit($refresh);
 
         $this->dispatchEvent(
             Events::POST_COMMIT,
@@ -151,7 +153,7 @@ class Manager
     }
 
     /**
-     * Flushes elasticsearch index.
+     * Flushes elasticsearch index. Please, prefer cheaper refresh() instead.
      */
     public function flush()
     {

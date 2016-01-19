@@ -158,7 +158,7 @@ class Connection
         $this->bulkQueries = array_merge($this->bulkQueries, $this->bulkParams);
         $this->getClient()->bulk($this->bulkQueries);
         if ($flush) {
-            $this->flush();
+            $this->refresh();
         }
 
         $this->bulkQueries = [];
