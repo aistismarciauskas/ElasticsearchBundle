@@ -232,6 +232,62 @@ class Repository
     }
 
     /**
+     * Executes given search and return array.
+     *
+     * @param Search $search
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
+    public function executeRaw(Search $search)
+    {
+        return $this->execute($search, self::RESULTS_RAW);
+    }
+
+    /**
+     * Executes given search and return raw iterator.
+     *
+     * @param Search $search
+     *
+     * @return RawResultIterator
+     *
+     * @throws \Exception
+     */
+    public function executeRawIterator(Search $search)
+    {
+        return $this->execute($search, self::RESULTS_RAW_ITERATOR);
+    }
+
+    /**
+     * Executes given search and return object.
+     *
+     * @param Search $search
+     *
+     * @return DocumentIterator
+     *
+     * @throws \Exception
+     */
+    public function executeObject(Search $search)
+    {
+        return $this->execute($search, self::RESULTS_OBJECT);
+    }
+
+    /**
+     * Executes given search and return scan iterator.
+     *
+     * @param Search $search
+     *
+     * @return DocumentScanIterator
+     *
+     * @throws \Exception
+     */
+    public function executeScanObject(Search $search)
+    {
+        return $this->execute($search, self::RESULTS_OBJECT);
+    }
+
+    /**
      * Delete by query.
      *
      * @param Search $search
