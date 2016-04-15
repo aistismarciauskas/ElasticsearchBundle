@@ -12,6 +12,7 @@
 namespace ONGR\ElasticsearchBundle\ORM;
 
 use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Guzzle\Common\Exception\RuntimeException;
 use ONGR\ElasticsearchBundle\Document\DocumentInterface;
 use ONGR\ElasticsearchBundle\DSL\Query\TermsQuery;
 use ONGR\ElasticsearchBundle\DSL\Search;
@@ -248,7 +249,7 @@ class Repository
             return $result;
         }
 
-        throw new \Exception('Wrong result type.');
+        throw new RuntimeException('Wrong result type.');
     }
 
     /**
@@ -268,7 +269,7 @@ class Repository
             return $result;
         }
 
-        throw new \Exception('Wrong result type.');
+        throw new RuntimeException('Wrong result type.');
     }
 
     /**
@@ -288,7 +289,7 @@ class Repository
             return $result;
         }
 
-        throw new \Exception('Wrong result type.');
+        throw new RuntimeException('Wrong result type.');
     }
 
     /**
