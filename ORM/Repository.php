@@ -242,7 +242,13 @@ class Repository
      */
     public function executeRaw(Search $search)
     {
-        return $this->execute($search, self::RESULTS_RAW);
+        $result = $this->execute($search, self::RESULTS_RAW);
+
+        if (is_array($result)) {
+            return $result;
+        }
+
+        throw new \Exception('Wrong result type.');
     }
 
     /**
@@ -256,11 +262,17 @@ class Repository
      */
     public function executeRawIterator(Search $search)
     {
-        return $this->execute($search, self::RESULTS_RAW_ITERATOR);
+        $result = $this->execute($search, self::RESULTS_RAW_ITERATOR);
+
+        if ($result instanceof RawResultIterator) {
+            return $result;
+        }
+
+        throw new \Exception('Wrong result type.');
     }
 
     /**
-     * Executes given search and return object.
+     * Executes given search and return object iterator.
      *
      * @param Search $search
      *
@@ -270,21 +282,13 @@ class Repository
      */
     public function executeObject(Search $search)
     {
-        return $this->execute($search, self::RESULTS_OBJECT);
-    }
+        $result = $this->execute($search, self::RESULTS_OBJECT);
 
-    /**
-     * Executes given search and return scan iterator.
-     *
-     * @param Search $search
-     *
-     * @return DocumentScanIterator
-     *
-     * @throws \Exception
-     */
-    public function executeScanObject(Search $search)
-    {
-        return $this->execute($search, self::RESULTS_OBJECT);
+        if ($result instanceof DocumentIterator) {
+            return $result;
+        }
+
+        throw new \Exception('Wrong result type.');
     }
 
     /**
