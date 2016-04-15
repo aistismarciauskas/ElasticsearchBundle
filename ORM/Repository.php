@@ -232,6 +232,66 @@ class Repository
     }
 
     /**
+     * Executes given search and return array.
+     *
+     * @param Search $search
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
+    public function executeRaw(Search $search)
+    {
+        $result = $this->execute($search, self::RESULTS_RAW);
+
+        if (is_array($result)) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Wrong result type.');
+    }
+
+    /**
+     * Executes given search and return raw iterator.
+     *
+     * @param Search $search
+     *
+     * @return RawResultIterator
+     *
+     * @throws \Exception
+     */
+    public function executeRawIterator(Search $search)
+    {
+        $result = $this->execute($search, self::RESULTS_RAW_ITERATOR);
+
+        if ($result instanceof RawResultIterator) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Wrong result type.');
+    }
+
+    /**
+     * Executes given search and return object iterator.
+     *
+     * @param Search $search
+     *
+     * @return DocumentIterator
+     *
+     * @throws \Exception
+     */
+    public function executeObject(Search $search)
+    {
+        $result = $this->execute($search, self::RESULTS_OBJECT);
+
+        if ($result instanceof DocumentIterator) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Wrong result type.');
+    }
+
+    /**
      * Delete by query.
      *
      * @param Search $search
