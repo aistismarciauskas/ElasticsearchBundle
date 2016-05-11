@@ -134,7 +134,7 @@ class ConnectionTest extends AbstractElasticsearchTestCase
         $this->assertEquals('Awesomo', $product->title, 'Document should be created.');
 
         // UPDATE.
-        $connection->bulk('update', 'product', ['_id' => 'baz', 'title' => 'Improved awesomo']);
+        $connection->bulk('update', 'product', ['_id' => 'baz', 'doc' => ['title' => 'Improved awesomo']]);
         $connection->commit();
 
         $product = $repository->find('baz');
