@@ -93,7 +93,7 @@ class Converter
     public function assignArrayToObject(array $array, $object, array $aliases)
     {
         foreach ($array as $name => $value) {
-            if (!array_key_exists($name, $aliases) || $value === null) {
+            if (!array_key_exists($name, $aliases)) {
                 $object->{$name} = $value;
                 continue;
             }
