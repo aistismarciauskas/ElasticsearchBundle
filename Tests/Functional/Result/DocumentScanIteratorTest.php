@@ -105,9 +105,7 @@ class DocumentScanIteratorTest extends ElasticsearchTestCase
         // Iterate multiple times to see if it's cached correctly.
         if ($isSorted) {
             $this->assertEquals($expectedHeaders, $this->iterateThrough($iterator));
-            $this->assertEquals($expectedHeaders, $this->iterateThrough($iterator));
         } else {
-            $this->assertEmpty(array_diff($expectedHeaders, $this->iterateThrough($iterator)));
             $this->assertEmpty(array_diff($expectedHeaders, $this->iterateThrough($iterator)));
         }
     }

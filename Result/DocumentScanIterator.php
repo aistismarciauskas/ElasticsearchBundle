@@ -38,6 +38,9 @@ class DocumentScanIterator extends DocumentIterator
      */
     private $key = 0;
 
+    /** @var bool */
+    private $cleanup = false;
+
     /**
      * @param Repository $repository
      *
@@ -108,9 +111,31 @@ class DocumentScanIterator extends DocumentIterator
         }
 
         $raw = $this->repository->scan($this->scrollId, $this->scrollDuration, Repository::RESULTS_RAW);
+
+        $chunkSize = count($raw['hits']['hits']);
+        if ($chunkSize === 0) {
+            return false;
+        }
+
         $this->setScrollId($raw['_scroll_id']);
 
-        $this->documents = array_merge($this->documents, $raw['hits']['hits']);
+        $this->documents = [];
+        foreach ($raw['hits']['hits'] as $key => $value) {
+            $this->documents[$key + $this->key] = $value;
+        }
+
+        // Clean up.
+        if ($this->cleanup === false && count($this->converted) >= $chunkSize * 2) {
+            $this->cleanup = true;
+        }
+
+        if ($this->cleanup === true) {
+            $tmp = $this->converted;
+            $this->converted = array_slice($tmp, -$chunkSize, $chunkSize, true);
+            unset($set);
+            unset($tmp);
+            $this->cleanup = false;
+        }
 
         return isset($this->documents[$this->key]);
     }

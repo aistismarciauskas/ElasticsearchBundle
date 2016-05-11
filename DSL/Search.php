@@ -27,8 +27,6 @@ use Symfony\Component\Serializer\Normalizer\CustomNormalizer;
  */
 class Search
 {
-    const SCROLL_DURATION = '5m';
-
     /**
      * @var int
      */
@@ -58,6 +56,11 @@ class Search
      * @var array
      */
     private $scriptFields;
+
+    /**
+     * @var string
+     */
+    private $timeout;
 
     /**
      * @var string
@@ -587,7 +590,7 @@ class Search
      *
      * @return Search
      */
-    public function setScroll($duration = self::SCROLL_DURATION)
+    public function setScroll($duration = '5m')
     {
         $this->scroll = $duration;
 
@@ -626,6 +629,22 @@ class Search
     public function getSearchType()
     {
         return $this->searchType;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
+    }
+
+    /**
+     * @param int $timeout
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
     }
 
     /**
@@ -678,6 +697,7 @@ class Search
         return array_filter(
             [
                 'scroll' => $this->getScroll(),
+                'timeout' => $this->getTimeout(),
                 'search_type' => $this->getSearchType(),
                 'preference' => $this->getPreference(),
             ]

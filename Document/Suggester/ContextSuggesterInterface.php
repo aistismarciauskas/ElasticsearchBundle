@@ -11,8 +11,6 @@
 
 namespace ONGR\ElasticsearchBundle\Document\Suggester;
 
-use ONGR\ElasticsearchBundle\Annotation as ES;
-
 /**
  * Interface to be used for completion suggestion objects.
  */
@@ -29,6 +27,8 @@ interface ContextSuggesterInterface extends SuggesterInterface
      * Sets context to be used for completion.
      *
      * @param object $context
+     *
+     * @return $this
      */
     public function setContext($context);
 }

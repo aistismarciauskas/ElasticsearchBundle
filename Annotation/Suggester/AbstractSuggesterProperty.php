@@ -11,7 +11,6 @@
 
 namespace ONGR\ElasticsearchBundle\Annotation\Suggester;
 
-use Doctrine\Common\Annotations\Annotation\Required;
 use ONGR\ElasticsearchBundle\Annotation\AbstractProperty;
 
 /**
@@ -36,7 +35,7 @@ abstract class AbstractSuggesterProperty extends AbstractProperty
      *
      * @Required
      */
-     public $objectName;
+    public $objectName;
 
     /**
      * @var string

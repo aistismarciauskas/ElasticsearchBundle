@@ -12,110 +12,94 @@
 namespace ONGR\ElasticsearchBundle\Tests\Unit\Result\Aggregation;
 
 use ONGR\ElasticsearchBundle\Result\Aggregation\AggregationIterator;
-use ONGR\ElasticsearchBundle\Result\Aggregation\ValueAggregation;
 
+/**
+ * Class AggregationIteratorTest.
+ */
 class AggregationIteratorTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * Returns sample data for tests.
-     *
-     * @return array
+     * Tests countable interface implementation.
      */
-    protected function getTestData()
+    public function testCountable()
     {
-        return [
-            'foo' => ['doc_count' => 1],
-            'bar' => ['doc_count' => 2],
+        $this->assertInstanceOf('\\Countable', new AggregationIterator([]));
+    }
+
+    /**
+     * Data provider for testCount.
+     */
+    public function countProvider()
+    {
+        $cases = [];
+
+        // Case #0. No data.
+        $cases[] = [
+            'data' => [],
+            'expectedCount' => 0,
         ];
-    }
 
-    /**
-     * Test for \ArrayAccess interface implementation.
-     */
-    public function testArrayAccess()
-    {
-        $iterator = new AggregationIterator($this->getTestData());
-
-        $this->assertEquals(new ValueAggregation(['doc_count' => 1]), $iterator->offsetGet('foo'));
-        $this->assertEquals(new ValueAggregation(['doc_count' => 2]), $iterator->offsetGet('bar'));
-
-        // Should return NULL if key does not exist.
-        $this->assertNull($iterator->offsetGet('baz'));
-    }
-
-    /**
-     * Test for \Iterator interface implementation.
-     */
-    public function testIterator()
-    {
-        $iterator = new AggregationIterator($this->getTestData());
-        $iterator->rewind();
-
-        $this->assertEquals('foo', $iterator->key());
-        $this->assertEquals(new ValueAggregation(['doc_count' => 1]), $iterator->current());
-        $iterator->next();
-
-        $this->assertEquals('bar', $iterator->key());
-        $this->assertEquals(new ValueAggregation(['doc_count' => 2]), $iterator->current());
-    }
-
-    /**
-     * Test for nested aggregations structure.
-     */
-    public function testNestedAggregations()
-    {
-        $data = $this->getTestData();
-        $data['bar']['agg_baz'] = ['doc_count' => 3];
-
-        $iterator = new AggregationIterator($data);
-
-        $this->assertTrue(isset($iterator['bar']->getAggregations()['baz']));
-        $this->assertEquals(
-            new ValueAggregation(['doc_count' => 3]),
-            $iterator['bar']->getAggregations()['baz']
-        );
-    }
-
-    /**
-     * Test for bucketed aggregations structure.
-     */
-    public function testBucketedAggregations()
-    {
-        $data = [
-            'foo' => [
-                'buckets' => [
-                    'bucket_1' => ['doc_count' => 1],
+        // Case #2. With data.
+        $cases[] = [
+            'data' => [
+                [
+                    'key' => 'weak',
+                    'doc_count' => 2,
+                    'agg_test_agg_2' => [
+                        'buckets' => [
+                            [
+                                'key' => '*-20.0',
+                                'to' => 20.0,
+                                'to_as_string' => '20.0',
+                                'doc_count' => 1,
+                            ],
+                            [
+                                'key' => '20.0-*',
+                                'from' => 20.0,
+                                'from_as_string' => '20.0',
+                                'doc_count' => 1,
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'key' => 'solid',
+                    'doc_count' => 1,
+                    'agg_test_agg_2' => [
+                        'buckets' => [
+                            [
+                                'key' => '*-20.0',
+                                'to' => 20.0,
+                                'to_as_string' => '20.0',
+                                'doc_count' => 1,
+                            ],
+                            [
+                                'key' => '20.0-*',
+                                'from' => 20.0,
+                                'from_as_string' => '20.0',
+                                'doc_count' => 0,
+                            ],
+                        ],
+                    ],
                 ],
             ],
+            'expectedCount' => 2,
         ];
 
+        return $cases;
+    }
+
+    /**
+     * Tests counting.
+     *
+     * @dataProvider countProvider
+     *
+     * @param array $data
+     * @param int   $expectedCount
+     */
+    public function testCount($data, $expectedCount)
+    {
         $iterator = new AggregationIterator($data);
-
-        $this->assertEquals(
-            new ValueAggregation(['doc_count' => 1]),
-            $iterator['foo']['bucket_1']
-        );
-    }
-
-    /**
-     * Test for offsetSet().
-     *
-     * @expectedException \LogicException
-     */
-    public function testOffsetSet()
-    {
-        $iterator = new AggregationIterator([]);
-        $iterator->offsetSet('foo', 'bar');
-    }
-
-    /**
-     * Test for offsetUnset().
-     *
-     * @expectedException \LogicException
-     */
-    public function testOffsetUnset()
-    {
-        $iterator = new AggregationIterator([]);
-        $iterator->offsetUnset('foo');
+        $this->assertCount($expectedCount, $iterator);
     }
 }

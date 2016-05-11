@@ -11,8 +11,6 @@
 
 namespace ONGR\ElasticsearchBundle\Annotation;
 
-use Doctrine\Common\Annotations\Annotation\Required;
-
 /**
  * Annotation used to check mapping type during the parsing process.
  *
@@ -124,6 +122,11 @@ final class Property extends AbstractProperty
      * @var string
      */
     public $geohashPrecision;
+
+    /**
+     * @var string
+     */
+    public $format;
 
     /**
      * @var bool

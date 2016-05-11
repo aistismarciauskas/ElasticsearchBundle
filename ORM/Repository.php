@@ -17,7 +17,6 @@ use ONGR\ElasticsearchBundle\DSL\Query\TermsQuery;
 use ONGR\ElasticsearchBundle\DSL\Search;
 use ONGR\ElasticsearchBundle\DSL\Sort\Sort;
 use ONGR\ElasticsearchBundle\DSL\Suggester\AbstractSuggester;
-use ONGR\ElasticsearchBundle\DSL\Suggester\Suggesters;
 use ONGR\ElasticsearchBundle\Result\Converter;
 use ONGR\ElasticsearchBundle\Result\DocumentIterator;
 use ONGR\ElasticsearchBundle\Result\DocumentScanIterator;
@@ -161,6 +160,48 @@ class Repository
     }
 
     /**
+     * Finds only one entity by a set of criteria.
+     *
+     * @param array      $criteria   Example: ['group' => ['best', 'worst'], 'job' => 'medic'].
+     * @param array|null $orderBy    Example: ['name' => 'ASC', 'surname' => 'DESC'].
+     * @param string     $resultType Result type returned.
+     *
+     * @return DocumentInterface|null The object.
+     */
+    public function findOneBy(array $criteria, array $orderBy = [], $resultType = self::RESULTS_OBJECT)
+    {
+        $search = $this->createSearch();
+        $search->setSize(1);
+
+        foreach ($criteria as $field => $value) {
+            $search->addQuery(new TermsQuery($field, is_array($value) ? $value : [$value]), 'must');
+        }
+
+        foreach ($orderBy as $field => $direction) {
+            $search->addSort(new Sort($field, strcasecmp($direction, 'asc') == 0 ? Sort::ORDER_ASC : Sort::ORDER_DESC));
+        }
+
+        $result = $this
+            ->getManager()
+            ->getConnection()
+            ->search($this->types, $this->checkFields($search->toArray()), $search->getQueryParams());
+
+        if ($resultType === self::RESULTS_OBJECT) {
+            $rawData = $result['hits']['hits'];
+            if (!count($rawData)) {
+                return null;
+            }
+
+            return (new Converter(
+                $this->getManager()->getTypesMapping(),
+                $this->getManager()->getBundlesMapping()
+            ))->convertToDocument($rawData[0]);
+        }
+
+        return $this->parseResult($result, $resultType, '');
+    }
+
+    /**
      * Returns search instance.
      *
      * @return Search
@@ -188,6 +229,66 @@ class Repository
             ->search($this->types, $this->checkFields($search->toArray()), $search->getQueryParams());
 
         return $this->parseResult($results, $resultsType, $search->getScroll());
+    }
+
+    /**
+     * Executes given search and return array.
+     *
+     * @param Search $search
+     *
+     * @return array
+     *
+     * @throws \Exception
+     */
+    public function executeRaw(Search $search)
+    {
+        $result = $this->execute($search, self::RESULTS_RAW);
+
+        if (is_array($result)) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Wrong result type.');
+    }
+
+    /**
+     * Executes given search and return raw iterator.
+     *
+     * @param Search $search
+     *
+     * @return RawResultIterator
+     *
+     * @throws \Exception
+     */
+    public function executeRawIterator(Search $search)
+    {
+        $result = $this->execute($search, self::RESULTS_RAW_ITERATOR);
+
+        if ($result instanceof RawResultIterator) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Wrong result type.');
+    }
+
+    /**
+     * Executes given search and return object iterator.
+     *
+     * @param Search $search
+     *
+     * @return DocumentIterator
+     *
+     * @throws \Exception
+     */
+    public function executeObject(Search $search)
+    {
+        $result = $this->execute($search, self::RESULTS_OBJECT);
+
+        if ($result instanceof DocumentIterator) {
+            return $result;
+        }
+
+        throw new \RuntimeException('Wrong result type.');
     }
 
     /**
@@ -220,7 +321,7 @@ class Repository
      */
     public function scan(
         $scrollId,
-        $scrollDuration = Search::SCROLL_DURATION,
+        $scrollDuration = '5m',
         $resultsType = self::RESULTS_OBJECT
     ) {
         $results = $this->getManager()->getConnection()->scroll($scrollId, $scrollDuration);

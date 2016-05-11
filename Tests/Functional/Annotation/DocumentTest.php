@@ -29,6 +29,10 @@ class DocumentTest extends AbstractElasticsearchTestCase
             '_ttl' => null,
             'enabled' => null,
             '_all' => ['enabled' => false],
+            'dynamic' => null,
+            'transform' => null,
+            'dynamic_date_formats' => null,
+            'dynamic_templates' => null,
         ];
         $this->assertEquals($expectedResult, $result);
     }

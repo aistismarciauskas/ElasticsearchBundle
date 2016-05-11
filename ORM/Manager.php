@@ -18,7 +18,6 @@ use ONGR\ElasticsearchBundle\Event\ElasticsearchPersistEvent;
 use ONGR\ElasticsearchBundle\Event\Events;
 use ONGR\ElasticsearchBundle\Mapping\ClassMetadata;
 use ONGR\ElasticsearchBundle\Mapping\ClassMetadataCollection;
-use ONGR\ElasticsearchBundle\Mapping\MetadataCollector;
 use ONGR\ElasticsearchBundle\Result\Converter;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -135,15 +134,17 @@ class Manager
 
     /**
      * Commits bulk batch to elasticsearch index.
+     *
+     * @param bool $refresh
      */
-    public function commit()
+    public function commit($refresh = true)
     {
         $this->dispatchEvent(
             Events::PRE_COMMIT,
             new ElasticsearchCommitEvent($this->getConnection())
         );
 
-        $this->getConnection()->commit();
+        $this->getConnection()->commit($refresh);
 
         $this->dispatchEvent(
             Events::POST_COMMIT,
@@ -152,7 +153,7 @@ class Manager
     }
 
     /**
-     * Flushes elasticsearch index.
+     * Flushes elasticsearch index. Please, prefer cheaper refresh() instead.
      */
     public function flush()
     {
@@ -253,7 +254,7 @@ class Manager
      */
     private function dispatchEvent($eventName, Event $event)
     {
-        if ($this->eventDispatcher != null) {
+        if ($this->eventDispatcher !== null) {
             $this->eventDispatcher->dispatch($eventName, $event);
         }
     }

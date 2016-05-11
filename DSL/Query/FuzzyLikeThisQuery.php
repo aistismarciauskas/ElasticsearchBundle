@@ -9,20 +9,18 @@
  * file that was distributed with this source code.
  */
 
-namespace ONGR\ElasticsearchBundle\DSL\Filter;
+namespace ONGR\ElasticsearchBundle\DSL\Query;
 
 /**
- * Represents Elasticsearch "or" filter.
- *
- * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-or-filter.html
+ * Elasticsearch fuzzy_like_this query class.
  */
-class OrFilter extends AndFilter
+class FuzzyLikeThisQuery extends FuzzyLikeThisFieldQuery
 {
     /**
      * {@inheritdoc}
      */
     public function getType()
     {
-        return 'or';
+        return 'fuzzy_like_this';
     }
 }

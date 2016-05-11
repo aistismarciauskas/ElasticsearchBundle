@@ -99,7 +99,12 @@ class Converter
             }
 
             if ($aliases[$name]['type'] === 'date') {
-                $value = \DateTime::createFromFormat(\DateTime::ISO8601, $value);
+                $newValue = \DateTime::createFromFormat(
+                    isset($aliases[$name]['format']) ? $aliases[$name]['format'] : \DateTime::ISO8601,
+                    $value
+                );
+                
+                $value = $newValue === false ? $value : $newValue;
             }
 
             if (array_key_exists('aliases', $aliases[$name])) {
@@ -113,8 +118,7 @@ class Converter
                     );
                 }
             }
-
-            $this->getPropertyAccessor()->setValue($object, $aliases[$name]['propertyName'], $value);
+            $this->setProperty($object, $aliases[$name]['propertyName'], $value);
         }
 
         return $object;
@@ -142,7 +146,7 @@ class Converter
 
         // Variable $name defined in client.
         foreach ($aliases as $name => $alias) {
-            $value = $this->getPropertyAccessor()->getValue($object, $alias['propertyName']);
+            $value = $this->getProperty($object, $alias['propertyName']);
 
             if (isset($value)) {
                 if (array_key_exists('aliases', $alias)) {
@@ -161,7 +165,7 @@ class Converter
                 }
 
                 if ($value instanceof \DateTime) {
-                    $value = $value->format(\DateTime::ISO8601);
+                    $value = $value->format(isset($alias['format']) ? $alias['format'] : \DateTime::ISO8601);
                 }
 
                 $array[$name] = $value;
@@ -189,7 +193,7 @@ class Converter
                     $value = new DocumentHighlight($value);
                 }
 
-                $this->getPropertyAccessor()->setValue($object, $this->getPropertyToAccess($field), $value);
+                $this->setProperty($object, $this->getPropertyToAccess($field), $value);
             }
         }
     }
@@ -204,7 +208,7 @@ class Converter
     private function setArrayFields(&$array, $object, $fields = [])
     {
         foreach ($fields as $field) {
-            $value = $this->getPropertyAccessor()->getValue($object, $this->getPropertyToAccess($field));
+            $value = $this->getProperty($object, $this->getPropertyToAccess($field));
 
             if ($value !== null) {
                 $this
@@ -318,5 +322,42 @@ class Converter
         }
 
         return $this->propertyAccessor;
+    }
+
+    /**
+     * Optimized setter.
+     *
+     * @param mixed  $object
+     * @param string $path
+     * @param mixed  $value
+     */
+    protected function setProperty($object, $path, $value)
+    {
+        if (strpos($path, '.') === false && $path[0] !== '_') {
+            $n = 'set' . ucfirst($path);
+            $object->{$n}($value);
+        } else {
+            $this->getPropertyAccessor()->setValue($object, $path, $value);
+        }
+    }
+
+    /**
+     * Optimized getter.
+     *
+     * @param mixed  $object
+     * @param string $path
+     *
+     * @return mixed
+     */
+    private function getProperty($object, $path)
+    {
+        if (strpos($path, '.') === false && $path[0] !== '_') {
+            $n = 'get' . ucfirst($path);
+            $value = $object->{$n}();
+        } else {
+            $value = $this->getPropertyAccessor()->getValue($object, $path);
+        }
+
+        return $value;
     }
 }
