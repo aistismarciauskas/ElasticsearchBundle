@@ -131,5 +131,5 @@ final class Property extends AbstractProperty
     /**
      * @var bool
      */
-    public $doc_values;
+    public $docValues;
 }
