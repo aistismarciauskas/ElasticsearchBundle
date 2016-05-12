@@ -21,14 +21,14 @@ trait TimestampableAwareTrait
     /**
      * @var \DateTime
      *
-     * @ES\Property(name="updatedAt", type="date", doc_values=true)
+     * @ES\Property(name="updatedAt", type="date")
      */
     private $updatedAt;
 
     /**
      * @var \DateTime
      *
-     * @ES\Property(name="createdAt", type="date", doc_values=true)
+     * @ES\Property(name="createdAt", type="date")
      */
     private $createdAt;
 
