@@ -37,7 +37,7 @@ abstract class AbstractProperty implements DumperInterface
         if (!array_key_exists('doc_values', $array) && array_key_exists('type', $array)) {
             $isCoreType = in_array(
                 $array['type'],
-                ['integer', 'long', 'float', 'double', 'boolean', 'null', 'ip', 'geo_point', 'geo_shape']
+                ['integer', 'long', 'float', 'double', 'boolean', 'null', 'ip', 'geo_point', 'geo_shape', 'date']
             );
             if ($isCoreType || $array['type'] === 'string'
                 && array_key_exists('index', $array) && $array['index'] === 'not_analyzed'
