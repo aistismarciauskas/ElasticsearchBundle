@@ -40,7 +40,11 @@ class ObjectIterator extends AbstractResultsIterator
         $this->converted = [];
 
         // Alias documents to have shorter path.
-        $this->documents = &$rawData;
+        if ($rawData === null) {
+            $this->documents = [];
+        } else {
+            $this->documents = &$rawData;
+        }
     }
 
     /**
