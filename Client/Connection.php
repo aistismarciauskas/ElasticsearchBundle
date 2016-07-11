@@ -15,6 +15,7 @@ use Elasticsearch\Client;
 use Elasticsearch\Common\Exceptions\Forbidden403Exception;
 use ONGR\ElasticsearchBundle\Cache\WarmerInterface;
 use ONGR\ElasticsearchBundle\Cache\WarmersContainer;
+use ONGR\ElasticsearchBundle\Exception\BulkWithErrorsException;
 use ONGR\ElasticsearchBundle\Mapping\MappingTool;
 
 /**
@@ -152,16 +153,25 @@ class Connection
      * Transmits the current query container to the index, used for bulk queries execution.
      *
      * @param bool $flush Flag for executing flush.
+     *
+     * @return array
+     * @throws BulkWithErrorsException
      */
     public function commit($flush = true)
     {
         $this->bulkQueries = array_merge($this->bulkQueries, $this->bulkParams);
-        $this->getClient()->bulk($this->bulkQueries);
+        $response = $this->getClient()->bulk($this->bulkQueries);
         if ($flush) {
             $this->refresh();
         }
 
         $this->bulkQueries = [];
+
+        if ($response['errors']) {
+            throw new BulkWithErrorsException(json_encode($response), 0, null, $response);
+        }
+
+        return $response;
     }
 
     /**

@@ -136,6 +136,8 @@ class Manager
      * Commits bulk batch to elasticsearch index.
      *
      * @param bool $refresh
+     *
+     * @return array
      */
     public function commit($refresh = true)
     {
@@ -144,12 +146,14 @@ class Manager
             new ElasticsearchCommitEvent($this->getConnection())
         );
 
-        $this->getConnection()->commit($refresh);
+        $response = $this->getConnection()->commit($refresh);
 
         $this->dispatchEvent(
             Events::POST_COMMIT,
             new ElasticsearchCommitEvent($this->getConnection())
         );
+
+        return $response;
     }
 
     /**
