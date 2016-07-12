@@ -257,6 +257,7 @@ abstract class AbstractElasticsearchTestCase extends WebTestCase
         // Drops and creates index.
         if ($createIndex) {
             $connection->dropAndCreateIndex();
+            $this->waitForStatusYellow($connection);
         }
 
         // Populates elasticsearch index with data.
@@ -266,5 +267,23 @@ abstract class AbstractElasticsearchTestCase extends WebTestCase
         }
 
         return $manager;
+    }
+
+    /**
+     * Wait for yellow status for a given connection.
+     *
+     * @param Connection $connection
+     */
+    protected function waitForStatusYellow(Connection $connection)
+    {
+        $params = [
+            'index' => $connection->getIndexName(),
+            'timeout' => '10s',
+            'wait_for_status' => 'yellow',
+        ];
+        $response = $connection->getClient()->cluster()->health($params);
+        if ($response['timed_out']) {
+            throw new \RuntimeException('Waiting for Yellow status failed. ' . json_encode($response));
+        }
     }
 }
