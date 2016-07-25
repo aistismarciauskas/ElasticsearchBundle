@@ -40,6 +40,11 @@ abstract class AbstractSuggesterProperty extends AbstractProperty
     /**
      * @var string
      */
+    public $analyzer;
+
+    /**
+     * @var string
+     */
     public $indexAnalyzer;
 
     /**
