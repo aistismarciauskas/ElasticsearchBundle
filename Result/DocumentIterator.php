@@ -158,4 +158,12 @@ class DocumentIterator extends AbstractResultsIterator
 
         return $this->suggestions;
     }
+
+    /**
+     * @return array
+     */
+    public function getRawData()
+    {
+        return $this->rawData;
+    }
 }
