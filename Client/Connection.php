@@ -289,6 +289,7 @@ class Connection
             unset($settings['body']['mappings']);
         }
         $this->getClient()->indices()->create($settings);
+        $this->waitForStatus();
 
         if ($putWarmers) {
             // Sometimes Elasticsearch gives service unavailable.
@@ -588,6 +589,25 @@ class Connection
             $this->settings = $settings;
         } else {
             $this->settings = array_replace_recursive($this->settings, $settings);
+        }
+    }
+
+    /**
+     * Wait for yellow status.
+     *
+     * @param string $timeout
+     * @param string $status
+     */
+    public function waitForStatus($timeout = '2s', $status = 'yellow')
+    {
+        $params = [
+            'index' => $this->getIndexName(),
+            'timeout' => $timeout,
+            'wait_for_status' => $status,
+        ];
+        $response = $this->getClient()->cluster()->health($params);
+        if ($response['timed_out']) {
+            throw new \RuntimeException('Waiting for status failed. ' . json_encode($response));
         }
     }
 
