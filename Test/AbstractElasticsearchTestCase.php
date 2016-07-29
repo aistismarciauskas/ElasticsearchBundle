@@ -257,7 +257,6 @@ abstract class AbstractElasticsearchTestCase extends WebTestCase
         // Drops and creates index.
         if ($createIndex) {
             $connection->dropAndCreateIndex();
-            $connection->waitForStatus();
         }
 
         // Populates elasticsearch index with data.
