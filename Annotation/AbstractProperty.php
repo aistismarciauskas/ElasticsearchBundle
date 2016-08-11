@@ -34,18 +34,6 @@ abstract class AbstractProperty implements DumperInterface
             array_flip(array_merge(['name', 'objectName', 'multiple'], $exclude))
         );
 
-        if (!array_key_exists('doc_values', $array) && array_key_exists('type', $array)) {
-            $isCoreType = in_array(
-                $array['type'],
-                ['integer', 'long', 'float', 'double', 'boolean', 'null', 'ip', 'geo_point', 'geo_shape', 'date']
-            );
-            if ($isCoreType || $array['type'] === 'string'
-                && array_key_exists('index', $array) && $array['index'] === 'not_analyzed'
-            ) {
-                $array['docValues'] = true;
-            }
-        }
-
         return array_combine(
             array_map(
                 function ($key) {
