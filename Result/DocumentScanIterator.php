@@ -41,6 +41,9 @@ class DocumentScanIterator extends DocumentIterator
     /** @var bool */
     private $cleanup = false;
 
+    /** @var int  */
+    private $maxKey = null;
+
     /**
      * @param Repository $repository
      *
@@ -99,6 +102,7 @@ class DocumentScanIterator extends DocumentIterator
     public function rewind()
     {
         $this->key = 0;
+        $this->maxKey = null;
     }
 
     /**
@@ -137,7 +141,15 @@ class DocumentScanIterator extends DocumentIterator
             $this->cleanup = false;
         }
 
-        return isset($this->documents[$this->key]);
+        if ($this->maxKey === null) {
+            $this->maxKey = $this->count() - 1;
+        }
+
+        $valid = isset($this->documents[$this->key]);
+        if (!$valid && $this->key < $this->maxKey) {
+            throw new IteratorException('Iteration terminated, not all items iterated');
+        }
+        return $valid;
     }
 
     /**
