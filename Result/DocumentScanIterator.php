@@ -114,10 +114,17 @@ class DocumentScanIterator extends DocumentIterator
             return true;
         }
 
+        if ($this->maxKey === null) {
+            $this->maxKey = $this->count() - 1;
+        }
+
         $raw = $this->repository->scan($this->scrollId, $this->scrollDuration, Repository::RESULTS_RAW);
 
         $chunkSize = count($raw['hits']['hits']);
         if ($chunkSize === 0) {
+            if ($this->key <= $this->maxKey) {
+                throw new IteratorException('Iteration terminated, no data in scan returned');
+            }
             return false;
         }
 
@@ -141,12 +148,8 @@ class DocumentScanIterator extends DocumentIterator
             $this->cleanup = false;
         }
 
-        if ($this->maxKey === null) {
-            $this->maxKey = $this->count() - 1;
-        }
-
         $valid = isset($this->documents[$this->key]);
-        if (!$valid && $this->key < $this->maxKey) {
+        if (!$valid && $this->key <= $this->maxKey) {
             throw new IteratorException('Iteration terminated, not all items iterated');
         }
         return $valid;
