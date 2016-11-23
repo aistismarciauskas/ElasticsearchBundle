@@ -122,7 +122,7 @@ class DocumentScanIterator extends DocumentIterator
 
         $chunkSize = count($raw['hits']['hits']);
         if ($chunkSize === 0) {
-            if ($this->key <= $this->maxKey) {
+            if ($this->key <= $this->maxKey && $this->maxKey > 0) {
                 throw new IteratorException('Iteration terminated, no data in scan returned');
             }
             return false;
