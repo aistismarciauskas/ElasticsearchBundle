@@ -71,6 +71,14 @@ class DocumentIterator extends AbstractResultsIterator
     }
 
     /**
+     * @param Converter $converter
+     */
+    public function setConverter(Converter $converter)
+    {
+        $this->converter = $converter;
+    }
+
+    /**
      * Returns a converter.
      *
      * @return Converter
