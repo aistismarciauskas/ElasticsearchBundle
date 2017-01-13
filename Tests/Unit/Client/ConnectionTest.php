@@ -13,9 +13,39 @@ namespace ONGR\ElasticsearchBundle\Tests\Unit\Client;
 
 use Elasticsearch\Client;
 use ONGR\ElasticsearchBundle\Client\Connection;
+use ONGR\ElasticsearchBundle\ParamsModifier\ParamsModifierInterface;
+use PHPUnit_Framework_MockObject_MockObject;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
+    public function testAddModifier()
+    {
+        $config = [
+            'index' => 'index_name',
+        ];
+        /** @var ParamsModifierInterface|PHPUnit_Framework_MockObject_MockObject $paramsModifier */
+        $paramsModifier = $this->getMockBuilder(ParamsModifierInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $paramsModifier->expects($this->at(0))->method('apply')->with([
+            'scroll_id' => 'test_id',
+            'scroll' => '1m'
+        ], ParamsModifierInterface::TYPE_SCROLL);
+        $paramsModifier->expects($this->at(1))->method('apply')->with([
+            'index' => 'index_name',
+            'type' => 'test_type',
+            'body' => ['test' => true],
+            'test_2' => true
+        ], ParamsModifierInterface::TYPE_SEARCH);
+
+        $connection = new Connection($this->getClient(), $config);
+        $connection->addQueryModifier($paramsModifier);
+        $connection->scroll('test_id', '1m');
+        $connection->search(['test_type'], ['test' => true], ['test_2' => true]);
+
+        $this->assertContains($paramsModifier, $connection->getQueryModifiers());
+    }
+
     /**
      * Tests if right values are being taken out.
      */

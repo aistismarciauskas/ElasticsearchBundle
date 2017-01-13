@@ -149,9 +149,18 @@ class MappingPass implements CompilerPassInterface
                 $this->getIndexParams($connections[$settings['connection']], $settings, $container),
             ]
         );
+        $connectionModifiers = $container->findTaggedServiceIds(
+            sprintf(
+                'es.connection.param_modifier.%s',
+                $settings['connection']
+            )
+        );
+
+        foreach ($connectionModifiers as $modifier) {
+            $connection->addMethodCall('addQueryModifier', [$modifier]);
+        }
 
         $connection->addMethodCall('setReadOnly', [$settings['readonly']]);
-        $connection->addMethodCall('setLogQueryStats', [$connections[$settings['connection']]['log_query_stats']]);
 
         $this->setWarmers($connection, $settings['connection'], $container);
 

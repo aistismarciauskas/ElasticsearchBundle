@@ -17,6 +17,7 @@ use ONGR\ElasticsearchBundle\Cache\WarmerInterface;
 use ONGR\ElasticsearchBundle\Cache\WarmersContainer;
 use ONGR\ElasticsearchBundle\Exception\BulkWithErrorsException;
 use ONGR\ElasticsearchBundle\Mapping\MappingTool;
+use ONGR\ElasticsearchBundle\ParamsModifier\ParamsModifierInterface;
 
 /**
  * This class interacts with elasticsearch using injected client.
@@ -27,11 +28,6 @@ class Connection
      * @var Client
      */
     private $client;
-
-    /**
-     * @var bool
-     */
-    private $logQueryStats = false;
 
     /**
      * Holds index information. Similar structure to elasticsearch docs.
@@ -73,6 +69,11 @@ class Connection
     private $readOnly;
 
     /**
+     * @var ParamsModifierInterface[]
+     */
+    private $queryModifiers;
+
+    /**
      * Construct.
      *
      * @param Client $client   Elasticsearch client.
@@ -88,19 +89,19 @@ class Connection
     }
 
     /**
-     * @return bool
+     * @return null|ParamsModifierInterface[]
      */
-    public function isLogQueryStats()
+    public function getQueryModifiers()
     {
-        return $this->logQueryStats;
+        return $this->queryModifiers;
     }
 
     /**
-     * @param bool $logQueryStats
+     * @param null|ParamsModifierInterface $queryModifier
      */
-    public function setLogQueryStats($logQueryStats)
+    public function addQueryModifier($queryModifier)
     {
-        $this->logQueryStats = $logQueryStats;
+        $this->queryModifiers[] = $queryModifier;
     }
 
     /**
@@ -264,14 +265,6 @@ class Connection
      */
     public function search(array $types, array $query, array $queryStringParams = [])
     {
-        if ($this->logQueryStats) {
-            if (isset($query['stats']) && is_array($query['stats'])) {
-                $query['stats'][] = $this->getStatsForQuery();
-            } else {
-                $query['stats'] = [$this->getStatsForQuery()];
-            }
-        }
-
         $params = [];
         $params['index'] = $this->getIndexName();
         $params['type'] = implode(',', $types);
@@ -280,6 +273,8 @@ class Connection
         if (!empty($queryStringParams)) {
             $params = array_merge($queryStringParams, $params);
         }
+
+        $params = $this->applyModifiers($params, ParamsModifierInterface::TYPE_SEARCH);
 
         return $this->getClient()->search($params);
     }
@@ -298,6 +293,7 @@ class Connection
         $params = [];
         $params['scroll_id'] = $scrollId;
         $params['scroll'] = $scrollDuration;
+        $params = $this->applyModifiers($params, ParamsModifierInterface::TYPE_SCROLL);
 
         return $this->getClient()->scroll($params);
     }
@@ -839,41 +835,20 @@ class Connection
         return [];
     }
 
-    private function getStatsForQuery()
+    /**
+     * @param array  $params
+     * @param string $type
+     *
+     * @return array|string
+     */
+    private function applyModifiers($params, $type)
     {
-        $backStack = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 12);
-        $stats = array_map(
-            function ($stat) {
-                $className = array_slice(explode('\\', $stat['class']), -1, 1)[0];
-                $functionName = $stat['function'];
-                return (strlen($className) > 12 ? substr(
-                        $className,
-                        strlen($className) - 12,
-                        8
-                    ) : $className) . ':' . (strlen($functionName) > 12 ? substr(
-                        $functionName,
-                        0,
-                        12
-                    ) : $functionName);
-            },
-            array_filter(
-                $backStack,
-                function ($stat) {
-                    return isset($stat['class']) && strpos($stat['class'], 'ONGR\ElasticsearchBundle') === false
-                        && strpos($stat['function'], '__') === false;
-                }
-            )
-        );
-        return substr(
-            array_reduce(
-                $stats,
-                function ($preveous, $val) {
-                    return $preveous . ($preveous ? '-' : '') . $val;
-                },
-                ''
-            ),
-            0,
-            1000
-        );
+        if ($this->queryModifiers) {
+            foreach ($this->queryModifiers as $modifier) {
+                $params = $modifier->apply($params, $type);
+            }
+        }
+
+        return $params;
     }
 }
