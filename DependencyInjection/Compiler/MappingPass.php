@@ -156,8 +156,8 @@ class MappingPass implements CompilerPassInterface
             )
         );
 
-        foreach ($connectionModifiers as $modifier) {
-            $connection->addMethodCall('addQueryModifier', [$modifier]);
+        foreach (array_keys($connectionModifiers) as $modifierDefinitionName) {
+            $connection->addMethodCall('addQueryModifier', [$container->getDefinition($modifierDefinitionName)]);
         }
 
         $connection->addMethodCall('setReadOnly', [$settings['readonly']]);

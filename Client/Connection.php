@@ -97,9 +97,9 @@ class Connection
     }
 
     /**
-     * @param null|ParamsModifierInterface $queryModifier
+     * @param ParamsModifierInterface $queryModifier
      */
-    public function addQueryModifier($queryModifier)
+    public function addQueryModifier(ParamsModifierInterface $queryModifier)
     {
         $this->queryModifiers[] = $queryModifier;
     }
