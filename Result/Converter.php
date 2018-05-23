@@ -111,6 +111,9 @@ class Converter
                 if ($aliases[$name]['multiple']) {
                     $value = new ObjectIterator($this, $value, $aliases[$name]);
                 } else {
+                    if ($name === 'translations' && $value === null) {
+                        $value = [];
+                    }
                     $value = $this->assignArrayToObject(
                         $value,
                         new $aliases[$name]['proxyNamespace'](),
