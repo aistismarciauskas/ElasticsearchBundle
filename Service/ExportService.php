@@ -12,6 +12,7 @@
 namespace ONGR\ElasticsearchBundle\Service;
 
 use ONGR\ElasticsearchBundle\DSL\Query\MatchAllQuery;
+use ONGR\ElasticsearchBundle\DSL\Sort\Sort;
 use ONGR\ElasticsearchBundle\ORM\Manager;
 use ONGR\ElasticsearchBundle\ORM\Repository;
 use ONGR\ElasticsearchBundle\Result\RawResultIterator;
@@ -96,6 +97,7 @@ class ExportService
         $search = $repository->createSearch();
         $search
             ->setScroll()
+            ->addSort(new Sort('_doc'))
             ->setSize($chunkSize);
         $search->addQuery(new MatchAllQuery());
 
