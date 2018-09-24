@@ -18,6 +18,7 @@ use ONGR\ElasticsearchBundle\DSL\ParametersTrait;
  * Represents Elasticsearch "bool" filter.
  *
  * @link http://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html
+ * @deprecated Use BoolFilter
  */
 class FilteredQuery implements BuilderInterface
 {

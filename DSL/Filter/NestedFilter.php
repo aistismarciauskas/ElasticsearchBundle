@@ -16,6 +16,8 @@ use ONGR\ElasticsearchBundle\DSL\ParametersTrait;
 
 /**
  * Nested filter implementation.
+ *
+ * @deprecated Use nested.query
  */
 class NestedFilter implements BuilderInterface
 {

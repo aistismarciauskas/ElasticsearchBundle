@@ -612,6 +612,8 @@ class Search
      *
      * @param string $searchType
      *
+     * @deprecated searchType scan is depricated
+     *
      * @return Search
      */
     public function setSearchType($searchType)

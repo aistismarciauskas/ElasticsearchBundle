@@ -16,6 +16,8 @@ use ONGR\ElasticsearchBundle\DSL\ParametersTrait;
 
 /**
  * Represents Elasticsearch "missing" filter.
+ *
+ * @deprecated Use must_not.exists
  */
 class MissingFilter implements BuilderInterface
 {

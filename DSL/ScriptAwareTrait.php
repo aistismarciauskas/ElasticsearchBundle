@@ -31,6 +31,8 @@ trait ScriptAwareTrait
 
     /**
      * @param string $script
+     *
+     * @deprecated Use painless
      */
     public function setScript($script)
     {
