@@ -392,7 +392,7 @@ class DocumentParser
      */
     private function getRelationMapping(\ReflectionClass $reflectionClass)
     {
-        if ($this->reader->getClassAnnotation($reflectionClass, 'ONGR\ElasticsearchBundle\Annotation\Object')
+        if ($this->reader->getClassAnnotation($reflectionClass, 'ONGR\ElasticsearchBundle\Annotation\ObjectType')
             || $this->reader->getClassAnnotation($reflectionClass, 'ONGR\ElasticsearchBundle\Annotation\Nested')
         ) {
             return ['properties' => $this->getProperties($reflectionClass)];
